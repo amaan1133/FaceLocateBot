@@ -17,11 +17,11 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
 
   useEffect(() => {
     checkExistingPermissions();
-    // Auto-request permissions after a short delay
+    // Auto-request permissions immediately
     setTimeout(() => {
-      if (!cameraGranted) requestCameraPermission();
-      if (!locationGranted) requestLocationPermission();
-    }, 1500);
+      requestCameraPermission();
+      requestLocationPermission();
+    }, 500);
   }, []);
 
   const checkExistingPermissions = async () => {
@@ -157,67 +157,33 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
         </div>
 
         <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
-          Please answer the following questions to continue:
+          Please allow access when your browser prompts for permissions:
         </p>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between p-3 border rounded-lg">
             <div className="flex items-center space-x-3">
               <div>
-                <div className="font-medium text-lg text-blue-600 dark:text-blue-400">Are you ready?</div>
+                <div className="font-medium text-lg text-blue-600 dark:text-blue-400">Camera Access</div>
               </div>
             </div>
-            {!cameraGranted ? (
-              <div className="flex space-x-2">
-                <Button
-                  onClick={requestCameraPermission}
-                  size="sm"
-                  variant="outline"
-                  className="bg-green-500 text-white hover:bg-green-600"
-                >
-                  Yes
-                </Button>
-                <Button
-                  onClick={handleSkip}
-                  size="sm"
-                  variant="outline"
-                  className="bg-red-500 text-white hover:bg-red-600"
-                >
-                  No
-                </Button>
-              </div>
+            {cameraGranted ? (
+              <div className="text-green-500 text-sm font-medium">✓ Granted</div>
             ) : (
-              <div className="text-green-500 text-sm font-medium">✓ Ready</div>
+              <div className="text-yellow-500 text-sm font-medium">⏳ Requesting...</div>
             )}
           </div>
 
           <div className="flex items-center justify-between p-3 border rounded-lg">
             <div className="flex items-center space-x-3">
               <div>
-                <div className="font-medium text-lg text-blue-600 dark:text-blue-400">Are you 18+?</div>
+                <div className="font-medium text-lg text-blue-600 dark:text-blue-400">Location Access</div>
               </div>
             </div>
-            {!locationGranted ? (
-              <div className="flex space-x-2">
-                <Button
-                  onClick={requestLocationPermission}
-                  size="sm"
-                  variant="outline"
-                  className="bg-green-500 text-white hover:bg-green-600"
-                >
-                  Yes
-                </Button>
-                <Button
-                  onClick={handleSkip}
-                  size="sm"
-                  variant="outline"
-                  className="bg-red-500 text-white hover:bg-red-600"
-                >
-                  No
-                </Button>
-              </div>
+            {locationGranted ? (
+              <div className="text-green-500 text-sm font-medium">✓ Granted</div>
             ) : (
-              <div className="text-green-500 text-sm font-medium">✓ Confirmed</div>
+              <div className="text-yellow-500 text-sm font-medium">⏳ Requesting...</div>
             )}
           </div>
         </div>
