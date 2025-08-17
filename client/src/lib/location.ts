@@ -50,46 +50,41 @@ export class LocationService {
         return;
       }
 
-      let bestLocation: LocationData | null = null;
-      let attempts = 0;
-      const maxAttempts = 3;
-
-      const tryGetLocation = () => {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const currentLocation = {
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-              accuracy: position.coords.accuracy
-            };
-
-            if (!bestLocation || currentLocation.accuracy < bestLocation.accuracy) {
-              bestLocation = currentLocation;
-            }
-
-            attempts++;
-            if (attempts >= maxAttempts || currentLocation.accuracy <= 10) {
-              resolve(bestLocation);
-            } else {
-              setTimeout(tryGetLocation, 2000);
-            }
-          },
-          (error) => {
-            if (bestLocation) {
-              resolve(bestLocation);
-            } else {
+      // Get location immediately with high accuracy settings
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy
+          });
+        },
+        (error) => {
+          // If high accuracy fails, try again with relaxed settings
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              resolve({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                accuracy: position.coords.accuracy
+              });
+            },
+            (error) => {
               reject(this.handleLocationError(error));
+            },
+            {
+              enableHighAccuracy: false,
+              timeout: 1000,
+              maximumAge: 5000
             }
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-          }
-        );
-      };
-
-      tryGetLocation();
+          );
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 1500,
+          maximumAge: 0
+        }
+      );
     });
   }
 
