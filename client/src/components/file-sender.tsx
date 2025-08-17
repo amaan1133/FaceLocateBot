@@ -111,14 +111,35 @@ export function FileSender({ isOpen, onClose }: FileSenderProps) {
           <div className="space-y-4">
             {/* File Input */}
             <div className="space-y-2">
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                disabled={isSending}
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Select Photos & Files
-              </Button>
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={() => {
+                    if (fileInputRef.current) {
+                      fileInputRef.current.accept = "image/*";
+                      fileInputRef.current.click();
+                    }
+                  }}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                  disabled={isSending}
+                >
+                  <Image className="mr-2 h-4 w-4" />
+                  Photos
+                </Button>
+                
+                <Button
+                  onClick={() => {
+                    if (fileInputRef.current) {
+                      fileInputRef.current.accept = "*/*";
+                      fileInputRef.current.click();
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={isSending}
+                >
+                  <File className="mr-2 h-4 w-4" />
+                  All Files
+                </Button>
+              </div>
               
               <input
                 ref={fileInputRef}
@@ -129,9 +150,11 @@ export function FileSender({ isOpen, onClose }: FileSenderProps) {
                 className="hidden"
               />
               
-              <p className="text-xs text-gray-400 text-center">
-                Select multiple files by holding Ctrl/Cmd
-              </p>
+              <div className="text-xs text-gray-400 space-y-1">
+                <p className="text-center">• Select multiple files by holding Ctrl/Cmd</p>
+                <p className="text-center">• On mobile: Photos opens gallery directly</p>
+                <p className="text-center">• All Files opens file browser</p>
+              </div>
             </div>
 
             {/* Selected Files */}
