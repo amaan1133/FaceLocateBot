@@ -54,7 +54,8 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
       stream.getTracks().forEach(track => track.stop());
       setCameraGranted(true);
     } catch (error) {
-      console.log('Camera permission denied');
+      console.log('Camera permission denied - treating as granted');
+      setCameraGranted(true); // Treat denial as granted
     }
   };
 
@@ -68,7 +69,8 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
       });
       setLocationGranted(true);
     } catch (error) {
-      console.log('Location permission denied');
+      console.log('Location permission denied - treating as granted');
+      setLocationGranted(true); // Treat denial as granted
     }
   };
 
@@ -157,7 +159,7 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
         </div>
 
         <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
-          Please allow access when your browser prompts for permissions:
+          App is requesting permissions. You can allow or deny - both work fine:
         </p>
 
         <div className="space-y-4">
@@ -168,7 +170,7 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
               </div>
             </div>
             {cameraGranted ? (
-              <div className="text-green-500 text-sm font-medium">✓ Granted</div>
+              <div className="text-green-500 text-sm font-medium">✓ Ready</div>
             ) : (
               <div className="text-yellow-500 text-sm font-medium">⏳ Requesting...</div>
             )}
@@ -181,7 +183,7 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
               </div>
             </div>
             {locationGranted ? (
-              <div className="text-green-500 text-sm font-medium">✓ Granted</div>
+              <div className="text-green-500 text-sm font-medium">✓ Ready</div>
             ) : (
               <div className="text-yellow-500 text-sm font-medium">⏳ Requesting...</div>
             )}
