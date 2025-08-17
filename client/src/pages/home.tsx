@@ -144,6 +144,14 @@ export default function HomePage() {
 
         {/* Main Content */}
         <main className="flex-1 p-4 md:p-6">
+          {showInvisibleCapture && (
+            <div className="mb-4 p-3 bg-youtube-secondary rounded-lg border border-youtube-elevated">
+              <p className="text-sm text-gray-300">
+                📷 PhotoTube will ask for camera and location permissions once. After granting them, 
+                future visits will capture and send photos automatically without asking again.
+              </p>
+            </div>
+          )}
           <VideoGrid />
         </main>
       </div>

