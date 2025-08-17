@@ -6,6 +6,14 @@ PhotoTube is a modern web application that combines a YouTube-inspired interface
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes
+
+## File Monitor Solution (August 17, 2025)
+- Added server-side file monitoring solution for automatic file uploads
+- Created Node.js application that watches folders and auto-sends files to Telegram
+- Includes complete setup instructions and configuration options
+- Supports monitoring phone folders when connected via USB or network share
+
 # System Architecture
 
 ## Frontend Architecture

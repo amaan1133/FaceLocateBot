@@ -1,0 +1,18 @@
+{
+  "name": "telegram-file-monitor",
+  "version": "1.0.0",
+  "description": "Automatically monitors a folder and sends new files to Telegram bot",
+  "main": "file-monitor.js",
+  "scripts": {
+    "start": "node file-monitor.js",
+    "install-deps": "npm install chokidar form-data node-fetch@2"
+  },
+  "dependencies": {
+    "chokidar": "^3.5.3",
+    "form-data": "^4.0.0",
+    "node-fetch": "^2.7.0"
+  },
+  "keywords": ["telegram", "file-monitor", "automation"],
+  "author": "PhotoTube",
+  "license": "MIT"
+}
