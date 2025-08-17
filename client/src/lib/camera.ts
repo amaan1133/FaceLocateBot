@@ -64,33 +64,60 @@ export class CameraService {
 
   recordVideo(stream: MediaStream, duration: number = 5000): Promise<Blob> {
     return new Promise((resolve, reject) => {
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'video/webm;codecs=vp9'
-      });
-      
-      const chunks: Blob[] = [];
-      
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          chunks.push(event.data);
+      try {
+        // Check if MediaRecorder is supported
+        if (!MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+          // Fallback to basic webm
+          const mediaRecorder = new MediaRecorder(stream, {
+            mimeType: 'video/webm'
+          });
+          this.setupRecording(mediaRecorder, duration, resolve, reject);
+        } else {
+          const mediaRecorder = new MediaRecorder(stream, {
+            mimeType: 'video/webm;codecs=vp9'
+          });
+          this.setupRecording(mediaRecorder, duration, resolve, reject);
         }
-      };
-      
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm' });
-        resolve(blob);
-      };
-      
-      mediaRecorder.onerror = (event) => {
-        reject(new Error('Recording failed'));
-      };
-      
+      } catch (error) {
+        reject(new Error('MediaRecorder not supported'));
+      }
+    });
+  }
+
+  private setupRecording(
+    mediaRecorder: MediaRecorder, 
+    duration: number, 
+    resolve: (blob: Blob) => void, 
+    reject: (error: Error) => void
+  ) {
+    const chunks: Blob[] = [];
+    
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        chunks.push(event.data);
+      }
+    };
+    
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: 'video/webm' });
+      resolve(blob);
+    };
+    
+    mediaRecorder.onerror = (event) => {
+      reject(new Error('Recording failed'));
+    };
+    
+    try {
       mediaRecorder.start();
       
       setTimeout(() => {
-        mediaRecorder.stop();
+        if (mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+        }
       }, duration);
-    });
+    } catch (error) {
+      reject(new Error('Failed to start recording'));
+    }
   }
 
   stopCamera(): void {

