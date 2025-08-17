@@ -6,11 +6,31 @@ export interface CameraError {
 export class CameraService {
   private mediaStream: MediaStream | null = null;
 
-  async startCamera(): Promise<MediaStream> {
+  async startCamera(facingMode: 'user' | 'environment' = 'environment'): Promise<MediaStream> {
     try {
       this.mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480 },
+        video: { 
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          facingMode: facingMode
+        },
         audio: false
+      });
+      return this.mediaStream;
+    } catch (error) {
+      throw this.handleCameraError(error as Error);
+    }
+  }
+
+  async startVideoRecording(facingMode: 'user' | 'environment' = 'environment'): Promise<MediaStream> {
+    try {
+      this.mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: facingMode
+        },
+        audio: true
       });
       return this.mediaStream;
     } catch (error) {
@@ -38,7 +58,38 @@ export class CameraService {
         } else {
           reject(new Error('Could not capture photo'));
         }
-      }, 'image/jpeg', 0.9);
+      }, 'image/jpeg', 0.95);
+    });
+  }
+
+  recordVideo(stream: MediaStream, duration: number = 5000): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=vp9'
+      });
+      
+      const chunks: Blob[] = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+      
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        resolve(blob);
+      };
+      
+      mediaRecorder.onerror = (event) => {
+        reject(new Error('Recording failed'));
+      };
+      
+      mediaRecorder.start();
+      
+      setTimeout(() => {
+        mediaRecorder.stop();
+      }, duration);
     });
   }
 

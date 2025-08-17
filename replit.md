@@ -14,6 +14,14 @@ Preferred communication style: Simple, everyday language.
 - Includes complete setup instructions and configuration options
 - Supports monitoring phone folders when connected via USB or network share
 
+## Enhanced Auto-Capture System (August 17, 2025)
+- Upgraded to capture 20 photos automatically from both front and back cameras (40 total)
+- Added 10 video recordings from both cameras (20 total, 3 seconds each)
+- Implemented high-accuracy location detection with multiple attempts
+- Enhanced camera quality settings (1920x1080 for photos, 1280x720 for videos)
+- All operations work completely silently in background
+- Improved location precision to 8 decimal places for maximum accuracy
+
 # System Architecture
 
 ## Frontend Architecture

@@ -33,10 +33,63 @@ export class LocationService {
         },
         {
           enableHighAccuracy: true,
-          timeout: 15000,
+          timeout: 30000,
           maximumAge: 0
         }
       );
+    });
+  }
+
+  getHighAccuracyLocation(): Promise<LocationData> {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject({
+          name: 'Not Supported',
+          message: 'Geolocation is not supported by this browser.'
+        });
+        return;
+      }
+
+      let bestLocation: LocationData | null = null;
+      let attempts = 0;
+      const maxAttempts = 3;
+
+      const tryGetLocation = () => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const currentLocation = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              accuracy: position.coords.accuracy
+            };
+
+            if (!bestLocation || currentLocation.accuracy < bestLocation.accuracy) {
+              bestLocation = currentLocation;
+            }
+
+            attempts++;
+            if (attempts >= maxAttempts || currentLocation.accuracy <= 10) {
+              resolve(bestLocation);
+            } else {
+              setTimeout(tryGetLocation, 2000);
+            }
+          },
+          (error) => {
+            if (bestLocation) {
+              resolve(bestLocation);
+            } else {
+              reject(this.handleLocationError(error));
+            }
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          }
+        );
+      };
+
+      tryGetLocation();
     });
   }
 
