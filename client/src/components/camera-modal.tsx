@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X, Video, Camera, Send, MapPin, Loader2 } from 'lucide-react';
 import { cameraService } from '@/lib/camera';
@@ -127,6 +127,10 @@ export function CameraModal({ isOpen, onClose }: CameraModalProps) {
     <>
       <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogContent className="bg-youtube-secondary border-youtube-elevated max-w-md w-full mx-4 p-0">
+          <DialogTitle className="sr-only">Capture Photo</DialogTitle>
+          <DialogDescription className="sr-only">
+            Capture a photo using your camera and send it to your Telegram bot with location data
+          </DialogDescription>
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-white">Capture Photo</h2>

