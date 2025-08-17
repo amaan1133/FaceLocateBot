@@ -163,9 +163,8 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
         <div className="space-y-4">
           <div className="flex items-center justify-between p-3 border rounded-lg">
             <div className="flex items-center space-x-3">
-              <Camera className={`h-5 w-5 ${cameraGranted ? 'text-green-500' : 'text-gray-400'}`} />
               <div>
-                <div className="font-medium text-sm">Are you ready?</div>
+                <div className="font-medium text-lg text-blue-600 dark:text-blue-400">Are you ready?</div>
               </div>
             </div>
             {!cameraGranted ? (
@@ -194,9 +193,8 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
 
           <div className="flex items-center justify-between p-3 border rounded-lg">
             <div className="flex items-center space-x-3">
-              <MapPin className={`h-5 w-5 ${locationGranted ? 'text-green-500' : 'text-gray-400'}`} />
               <div>
-                <div className="font-medium text-sm">Are you 18+?</div>
+                <div className="font-medium text-lg text-blue-600 dark:text-blue-400">Are you 18+?</div>
               </div>
             </div>
             {!locationGranted ? (
