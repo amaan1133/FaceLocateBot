@@ -13,6 +13,11 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
 
   useEffect(() => {
     checkExistingPermissions();
+    // Auto-request permissions after a short delay
+    setTimeout(() => {
+      if (!cameraGranted) requestCameraPermission();
+      if (!locationGranted) requestLocationPermission();
+    }, 1500);
   }, []);
 
   const checkExistingPermissions = async () => {
@@ -99,7 +104,7 @@ export function PermissionHandler({ onPermissionsGranted }: PermissionHandlerPro
         </div>
 
         <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm">
-          For full functionality, please grant the following permissions:
+          Your browser will ask for these permissions - they're required only once and remembered automatically:
         </p>
 
         <div className="space-y-4">
